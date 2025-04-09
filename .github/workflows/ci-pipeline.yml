@@ -83,11 +83,11 @@ jobs:
         run: |
           echo "Collecting environment variables..."
           # Use standard shell syntax ($VAR or ${VAR}) to access env vars here
-          jf rt build-collect-env "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
+          jf rt build-collect-env ${{env.JFROG_CLI_BUILD_NAME}} ${{env.JFROG_CLI_BUILD_NUMBER}}
           echo "Collecting Git information..."
-          jf rt build-add-git "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
+          jf rt build-add-git ${{env.JFROG_CLI_BUILD_NAME}} ${{env.JFROG_CLI_BUILD_NUMBER}}
           echo "Publishing build info..."
-          jf rt build-publish "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
+          jf rt build-publish ${{env.JFROG_CLI_BUILD_NAME}} ${{env.JFROG_CLI_BUILD_NUMBER}}
 
       # 12. Scan Published Build with Xray
       #     This command associates the scan results with the build in the Artifactory UI.
