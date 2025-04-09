@@ -75,7 +75,7 @@ jobs:
       # 10. Push Docker Image using JFrog CLI
       #     Explicitly link Docker image layers to the build info.
       - name: Push Docker Image to Artifactory
-        run: jf docker push trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:$JFROG_CLI_BUILD_NUMBER
+        run: jf docker push trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:${{ github.run_id }}
 
       # 11. Publish Build Information
       #     Collects environment, Git info, and publishes the aggregated build record.
