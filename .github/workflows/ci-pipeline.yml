@@ -96,7 +96,6 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          echo "Scanning build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER with Xray..." # <-- Corrected syntax
-          # Use standard shell syntax ($VAR or ${VAR}) to access env vars here
-          jf bs "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
+          echo "Scanning build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER with Xray..."
+          jf bs ${{env.JFROG_CLI_BUILD_NAME}} ${{env.JFROG_CLI_BUILD_NUMBER}}
           echo "Xray scan initiated via jf bs. Check the build info's Xray Data tab in Artifactory UI for results."
