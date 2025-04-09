@@ -83,11 +83,23 @@ jobs:
         run: |
           echo "Collecting environment variables..."
           # Use standard shell syntax ($VAR or ${VAR}) to access env vars here
-          jf rt build-collect-env ${{env.JFROG_CLI_BUILD_NAME}} ${{env.JFROG_CLI_BUILD_NUMBER}}
+          jf rt build-collect-env "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- CORRECTED syntax
           echo "Collecting Git information..."
-          jf rt build-add-git ${{env.JFROG_CLI_BUILD_NAME}} ${{env.JFROG_CLI_BUILD_NUMBER}}
+          jf rt build-add-git "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- CORRECTED syntax
           echo "Publishing build info..."
-          jf rt build-publish ${{env.JFROG_CLI_BUILD_NAME}} ${{env.JFROG_CLI_BUILD_NUMBER}}
+          jf rt build-publish "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- CORRECTED syntax
+
+      # 12. Scan Published Build with Xray
+      #     This command associates the scan results with the build in the Artifactory UI.
+      #     'continue-on-error' prevents CI failure if jf bs exits non-zero.
+      - name: Scan Published Build with Xray
+        if: success()
+        continue-on-error: true
+        run: |
+          echo "Scanning build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER with Xray..." # <-- Already correct here
+          # Use standard shell syntax ($VAR or ${VAR}) to access env vars here
+          jf bs "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- CORRECTED syntax
+          echo "Xray scan initiated via jf bs. Check the build info's Xray Data tab in Artifactory UI for results." 
 
       # 12. Scan Published Build with Xray
       #     This command associates the scan results with the build in the Artifactory UI.
