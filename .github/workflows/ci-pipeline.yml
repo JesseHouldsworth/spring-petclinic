@@ -76,11 +76,10 @@ jobs:
       #     Explicitly link Docker image layers to the build info.
       - name: Push Docker Image to Artifactory
         run: |
-          # Use standard shell syntax ($VAR or ${VAR}) to access env vars here
           jf rt docker-push \
             trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:$JFROG_CLI_BUILD_NUMBER \
             petclinic-docker-dev-local \
-            --build-name="$JFROG_CLI_BUILD_NAME" --build-number="$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
+            --build-name="$JFROG_CLI_BUILD_NAME" --build-number="$JFROG_CLI_BUILD_NUMBER" #
 
       # 11. Publish Build Information
       #     Collects environment, Git info, and publishes the aggregated build record.
