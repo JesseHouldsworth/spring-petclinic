@@ -80,7 +80,7 @@ jobs:
       #################################################
       - name: Maven Build & Deploy With JFrog CLI
         run: |
-          jf mvn clean deploy \ # <-- Changed 'install' to 'deploy'
+          jf mvn clean deploy \
             -DskipTests=true -Denforcer.skip=true
 
       #################################################
@@ -114,10 +114,10 @@ jobs:
       - name: Publish Build Info
         run: |
           echo "Collecting environment variables for build info..."
-          jf rt build-collect-env "spring-petclinic" "${{ github.run_id }}" # <-- Re-added
+          jf rt build-collect-env "spring-petclinic" "${{ github.run_id }}"
 
           echo "Adding Git information to build info..."
-          jf rt build-add-git "spring-petclinic" "${{ github.run_id }}" # <-- Re-added (ensure JF_GIT_TOKEN is valid)
+          jf rt build-add-git "spring-petclinic" "${{ github.run_id }}"
 
           echo "Publishing build info..."
           jf rt build-publish "spring-petclinic" "${{ github.run_id }}"
