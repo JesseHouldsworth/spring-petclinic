@@ -72,7 +72,7 @@ jobs:
           jf mvnc --global \
             --repo-resolve-releases petclinic-maven-dev-virtual \
             --repo-resolve-snapshots petclinic-maven-dev-virtual \
-            --repo-deploy-releases petclinic-maven-dev-local \ # <-- Adjust repo name if needed
+            --repo-deploy-releases petclinic-maven-dev-local \
             --repo-deploy-snapshots petclinic-maven-dev-local   # <-- Adjust repo name if needed
 
       #################################################
