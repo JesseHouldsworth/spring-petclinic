@@ -76,29 +76,32 @@ jobs:
       #     Explicitly link Docker image layers to the build info.
       - name: Push Docker Image to Artifactory
         run: |
+          # Use standard shell syntax ($VAR or ${VAR}) to access env vars here
           jf rt docker-push \
-            trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:${{ github.run_id }} \
+            trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:$JFROG_CLI_BUILD_NUMBER \
             petclinic-docker-dev-local \
-            --build-name="${{ env.JFROG_CLI_BUILD_NAME }}" --build-number="${{ env.JFROG_CLI_BUILD_NUMBER }}"
+            --build-name="$JFROG_CLI_BUILD_NAME" --build-number="$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
 
       # 11. Publish Build Information
       #     Collects environment, Git info, and publishes the aggregated build record.
       - name: Publish Build Info
         run: |
           echo "Collecting environment variables..."
-          jf rt build-collect-env "${{ env.JFROG_CLI_BUILD_NAME }}" "${{ env.JFROG_CLI_BUILD_NUMBER }}"
+          # Use standard shell syntax ($VAR or ${VAR}) to access env vars here
+          jf rt build-collect-env "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
           echo "Collecting Git information..."
-          jf rt build-add-git "${{ env.JFROG_CLI_BUILD_NAME }}" "${{ env.JFROG_CLI_BUILD_NUMBER }}"
+          jf rt build-add-git "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
           echo "Publishing build info..."
-          jf rt build-publish "${{ env.JFROG_CLI_BUILD_NAME }}" "${{ env.JFROG_CLI_BUILD_NUMBER }}"
+          jf rt build-publish "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
 
       # 12. Scan Published Build with Xray
       #     This command associates the scan results with the build in the Artifactory UI.
-      #     'continue-on-error' prevents CI failure if jf bs exits non-zero (e.g., no fail-build policy triggered).
+      #     'continue-on-error' prevents CI failure if jf bs exits non-zero.
       - name: Scan Published Build with Xray
-        if: success() # Only run if build publish succeeded
-        continue-on-error: true # Allows pipeline to continue even if exit code is non-zero
+        if: success()
+        continue-on-error: true
         run: |
-          echo "Scanning build ${{ env.JFROG_CLI_BUILD_NAME }}/${{ env.JFROG_CLI_BUILD_NUMBER }} with Xray..."
-          jf bs "${{ env.JFROG_CLI_BUILD_NAME }}" "${{ env.JFROG_CLI_BUILD_NUMBER }}"
+          echo "Scanning build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER with Xray..." # <-- Corrected syntax
+          # Use standard shell syntax ($VAR or ${VAR}) to access env vars here
+          jf bs "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- Corrected syntax
           echo "Xray scan initiated via jf bs. Check the build info's Xray Data tab in Artifactory UI for results."
