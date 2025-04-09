@@ -70,7 +70,7 @@ jobs:
       # 9. Build Docker Image
       - name: Build Docker Image
         run: |
-          docker build -t trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:${{ github.run_id }} .
+          jf docker build -t trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:${{ github.run_id }} .
 
       # 10. Push Docker Image using JFrog CLI
       #     Explicitly link Docker image layers to the build info.
@@ -78,7 +78,7 @@ jobs:
         run: |
           jf docker push \
             trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:$JFROG_CLI_BUILD_NUMBER \
-            --build-name="$JFROG_CLI_BUILD_NAME" --build-number="$JFROG_CLI_BUILD_NUMBER"
+            --build-name ${{env.JFROG_CLI_BUILD_NAME}} --build-number ${{env.JFROG_CLI_BUILD_NUMBER}}
 
       # 11. Publish Build Information
       #     Collects environment, Git info, and publishes the aggregated build record.
