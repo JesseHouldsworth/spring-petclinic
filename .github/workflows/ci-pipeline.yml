@@ -109,8 +109,8 @@ jobs:
       #################################################
       - name: Publish Build Info
         run: |
-          jf rt bce "spring-petclinic" "${{ github.run_id }}"      # Set build context
-          jf rt build-collect-env                                  # Collect environment variables
-          jf rt build-add-dependencies .                           # Add dependencies found in the current directory
-          jf rt build-add-git                                      # Add Git commit information
-          jf rt build-publish                                      # Publishes build metadata (artifacts, env, git) to JFrog
+          jf rt build-collect-env "spring-petclinic" "${{ github.run_id }}"
+          jf rt build-add-dependencies . "spring-petclinic" "${{ github.run_id }}"
+          jf rt build-add-git "spring-petclinic" "${{ github.run_id }}"
+          jf rt build-publish "spring-petclinic" "${{ github.run_id }}"
+    
