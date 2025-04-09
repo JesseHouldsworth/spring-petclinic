@@ -67,16 +67,20 @@ jobs:
       #################################################
       # 7) Configure Maven to use JFrog as a repository
       #################################################
-      - name: configure maven
-        run: jf mvnc --global --repo-resolve-releases petclinic-maven-dev-virtual/ --repo-resolve-snapshots petclinic-maven-dev-virtual/
-        # Configures Maven to resolve dependencies from Artifactory
+      - name: Configure Maven Repositories with JFrog CLI
+        run: |
+          jf mvnc --global \
+            --repo-resolve-releases petclinic-maven-dev-virtual \
+            --repo-resolve-snapshots petclinic-maven-dev-virtual \
+            --repo-deploy-releases petclinic-maven-dev-local \ # <-- Adjust repo name if needed
+            --repo-deploy-snapshots petclinic-maven-dev-local   # <-- Adjust repo name if needed
 
       #################################################
       # 8) Build project using JFrog CLI with Maven
       #################################################
-      - name: Maven Build With JFrog CLI
+      - name: Maven Build & Deploy With JFrog CLI
         run: |
-          jf mvn clean install \
+          jf mvn clean deploy \ # <-- Changed 'install' to 'deploy'
             -DskipTests=true -Denforcer.skip=true
 
       #################################################
@@ -108,4 +112,21 @@ jobs:
       # 12) Publish Build Information to JFrog
       #################################################
       - name: Publish Build Info
-        run: jf rt build-publish "spring-petclinic" "${{ github.run_id }}"
+        run: |
+          echo "Collecting environment variables for build info..."
+          jf rt build-collect-env "spring-petclinic" "${{ github.run_id }}" # <-- Re-added
+
+          echo "Adding Git information to build info..."
+          jf rt build-add-git "spring-petclinic" "${{ github.run_id }}" # <-- Re-added (ensure JF_GIT_TOKEN is valid)
+
+          echo "Publishing build info..."
+          jf rt build-publish "spring-petclinic" "${{ github.run_id }}"
+
+      #################################################
+      # 13) Scan Published Build with Xray
+      #################################################
+      - name: Scan Published Build with Xray
+        if: success() # Only run if the build publish succeeded
+        run: |
+          echo "Scanning build spring-petclinic/${{ github.run_id }} with Xray..."
+          jf bs "spring-petclinic" "${{ github.run_id }}"
