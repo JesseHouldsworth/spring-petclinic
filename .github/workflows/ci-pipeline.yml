@@ -52,7 +52,7 @@ jobs:
       - name: Clear local Maven cache
         run: rm -rf ~/.m2/repository  # Ensures a clean build by removing old dependencies
 
-      #################################################
+      ################################################
       # 5) Ensure mvnw is executable
       #################################################
       - name: Ensure mvnw is executable
