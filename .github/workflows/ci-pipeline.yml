@@ -1,132 +1,104 @@
-name: Build with JFrog CLI (Forcing New Extractor)
+name: Build and Scan with JFrog
 
 on:
   push:
     branches:
       - main
       - develop
-
   pull_request:
-    branches: [ "main" ]  # Trigger workflow on pull requests targeting main
+    branches: [ "main" ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner for execution
+  build-and-scan:
+    runs-on: ubuntu-latest
 
     steps:
-      #################################################
-      # 1) Checkout the repository to the runner
-      #################################################
+      # 1. Checkout Code
       - name: Checkout
-        uses: actions/checkout@v4  # Pulls the latest code from the repository
+        uses: actions/checkout@v4
 
-      #################################################
-      # 2) Set up Java environment
-      #################################################
+      # 2. Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'  # Use Eclipse Temurin JDK (OpenJDK)
-          java-version: '17'       # Ensure Java 17 is installed
+          distribution: 'temurin'
+          java-version: '17'
 
-      #################################################
-      # 3) Install and Configure JFrog CLI
-      # ✨ Explicitly set build name/number to avoid duplicate builds
-      #################################################
+      # 3. Setup JFrog CLI & Environment Variables for Build Info
+      #    Crucially sets JFROG_CLI_BUILD_NAME and JFROG_CLI_BUILD_NUMBER
       - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4  # Official JFrog CLI GitHub Action
+        uses: jfrog/setup-jfrog-cli@v4
         id: setup-cli
         env:
-          JF_URL: ${{ secrets.JF_RT_URL }}  # Artifactory base URL
-          JF_USER: ${{ secrets.ARTIFACTORY_USERNAME }}  # Artifactory username
-          JF_PASSWORD: ${{ secrets.ARTIFACTORY_IDENTITY_TOKEN }}  # Artifactory identity token
-          JF_GIT_TOKEN: ${{ secrets.GH_TOKEN }}  # GitHub token for git info
-          JFROG_CLI_RELEASES_REPO: 'https://trialt0zppb.jfrog.io/artifactory/petclinic-maven-dev-virtual/'
-          JFROG_CLI_EXTRACTORS_REMOTE: 'https://trialt0zppb.jfrog.io/artifactory/petclinic-maven-dev-virtual/'
-          JFROG_CLI_BUILD_NAME: spring-petclinic  # 👈 Ensures CLI uses consistent build name
-          JFROG_CLI_BUILD_NUMBER: ${{ github.run_id }}  # 👈 Matches the CLI-published build number
+          JF_URL: ${{ secrets.JF_RT_URL }}
+          JF_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
+          JF_PASSWORD: ${{ secrets.ARTIFACTORY_IDENTITY_TOKEN }}
+          JF_GIT_TOKEN: ${{ secrets.GH_TOKEN }} # For Git info collection
+          # Define Build Name and Number for automatic association
+          JFROG_CLI_BUILD_NAME: spring-petclinic # Consistent build name
+          JFROG_CLI_BUILD_NUMBER: ${{ github.run_id }} # Unique build number
 
-      #################################################
-      # 4) Clean the local Maven cache (optional but recommended)
-      #################################################
+      # 4. Clean local Maven cache (optional but recommended)
       - name: Clear local Maven cache
-        run: rm -rf ~/.m2/repository  # Ensures a clean build by removing old dependencies
+        run: rm -rf ~/.m2/repository
 
-      ################################################
-      # 5) Ensure mvnw is executable
-      #################################################
+      # 5. Ensure mvnw is executable
       - name: Ensure mvnw is executable
-        run: chmod +x mvnw  # Make the Maven wrapper script executable
+        run: chmod +x mvnw
 
-      #################################################
-      # 6) Verify JFrog connection
-      #################################################
-      - name: ping jfrog
-        run: jf rt ping  # Verifies connectivity to Artifactory
+      # 6. Verify JFrog connection
+      - name: Ping JFrog Connection
+        run: jf rt ping
 
-      #################################################
-      # 7) Configure Maven to use JFrog as a repository
-      #################################################
+      # 7. Configure Maven Repositories (Resolution & Deployment)
+      #    Ensure 'petclinic-maven-dev-local' exists and permissions are set.
       - name: Configure Maven Repositories with JFrog CLI
         run: |
           jf mvnc --global \
             --repo-resolve-releases petclinic-maven-dev-virtual \
             --repo-resolve-snapshots petclinic-maven-dev-virtual \
             --repo-deploy-releases petclinic-maven-dev-local \
-            --repo-deploy-snapshots petclinic-maven-dev-local   # <-- Adjust repo name if needed
+            --repo-deploy-snapshots petclinic-maven-dev-local
 
-      #################################################
-      # 8) Build project using JFrog CLI with Maven
-      #################################################
+      # 8. Build and Deploy with Maven using JFrog CLI
+      #    'deploy' goal pushes artifacts to Artifactory.
+      #    'jf mvn' automatically associates deployed artifacts with build info.
       - name: Maven Build & Deploy With JFrog CLI
         run: |
-          jf mvn clean deploy \
-            -DskipTests=true -Denforcer.skip=true
+          jf mvn clean deploy -DskipTests=true -Denforcer.skip=true
 
-      #################################################
-      # 9) Scan with XRay
-      #################################################
-      - name: Scan Artifact
-        run: |
-          latest_jar=$(find target -name "*.jar" | sort | tail -n 1)
-          echo "Scanning: $latest_jar"
-          jf scan "$latest_jar"
-
-      #################################################
-      # 10) Build Docker image with local Docker
-      #################################################
+      # 9. Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:${{ github.run_id }} .
 
-      #################################################
-      # 11) Push Docker image using JFrog CLI
-      #################################################
+      # 10. Push Docker Image using JFrog CLI
+      #     Explicitly link Docker image layers to the build info.
       - name: Push Docker Image to Artifactory
         run: |
           jf rt docker-push \
             trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:${{ github.run_id }} \
-            petclinic-docker-dev-local
+            petclinic-docker-dev-local \
+            --build-name="${{ env.JFROG_CLI_BUILD_NAME }}" --build-number="${{ env.JFROG_CLI_BUILD_NUMBER }}"
 
-      #################################################
-      # 12) Publish Build Information to JFrog
-      #################################################
+      # 11. Publish Build Information
+      #     Collects environment, Git info, and publishes the aggregated build record.
       - name: Publish Build Info
         run: |
-          echo "Collecting environment variables for build info..."
-          jf rt build-collect-env "spring-petclinic" "${{ github.run_id }}"
-
-          echo "Adding Git information to build info..."
-          jf rt build-add-git "spring-petclinic" "${{ github.run_id }}"
-
+          echo "Collecting environment variables..."
+          jf rt build-collect-env "${{ env.JFROG_CLI_BUILD_NAME }}" "${{ env.JFROG_CLI_BUILD_NUMBER }}"
+          echo "Collecting Git information..."
+          jf rt build-add-git "${{ env.JFROG_CLI_BUILD_NAME }}" "${{ env.JFROG_CLI_BUILD_NUMBER }}"
           echo "Publishing build info..."
-          jf rt build-publish "spring-petclinic" "${{ github.run_id }}"
+          jf rt build-publish "${{ env.JFROG_CLI_BUILD_NAME }}" "${{ env.JFROG_CLI_BUILD_NUMBER }}"
 
-      #################################################
-      # 13) Scan Published Build with Xray
-      #################################################
+      # 12. Scan Published Build with Xray
+      #     This command associates the scan results with the build in the Artifactory UI.
+      #     'continue-on-error' prevents CI failure if jf bs exits non-zero (e.g., no fail-build policy triggered).
       - name: Scan Published Build with Xray
-        if: success() # Only run if the build publish succeeded
+        if: success() # Only run if build publish succeeded
+        continue-on-error: true # Allows pipeline to continue even if exit code is non-zero
         run: |
-          echo "Scanning build spring-petclinic/${{ github.run_id }} with Xray..."
-          jf bs "spring-petclinic" "${{ github.run_id }}"
+          echo "Scanning build ${{ env.JFROG_CLI_BUILD_NAME }}/${{ env.JFROG_CLI_BUILD_NUMBER }} with Xray..."
+          jf bs "${{ env.JFROG_CLI_BUILD_NAME }}" "${{ env.JFROG_CLI_BUILD_NUMBER }}"
+          echo "Xray scan initiated via jf bs. Check the build info's Xray Data tab in Artifactory UI for results."
