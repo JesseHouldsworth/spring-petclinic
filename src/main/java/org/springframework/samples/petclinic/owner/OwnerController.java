@@ -81,7 +81,7 @@ class OwnerController {
 
 		this.owners.save(owner);
 		redirectAttributes.addFlashAttribute("message", "New Owner Created");
-		return "redirect:/owners/{ownerId}".replace("{ownerId}", URLEncoder.encode(String.valueOf(owner.getId()), StandardCharsets.UTF_8));
+		return "redirect:/owners/" + owner.getId();
 	}
 
 	@GetMapping("/owners/find")
