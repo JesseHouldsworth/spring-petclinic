@@ -78,8 +78,7 @@ jobs:
         run: |
           jf rt docker-push \
             trialt0zppb.jfrog.io/petclinic-docker-dev-local/spring-petclinic:$JFROG_CLI_BUILD_NUMBER \
-            petclinic-docker-dev-local \
-            --build-name="$JFROG_CLI_BUILD_NAME" --build-number="$JFROG_CLI_BUILD_NUMBER" #
+            --build-name="$JFROG_CLI_BUILD_NAME" --build-number="$JFROG_CLI_BUILD_NUMBER"
 
       # 11. Publish Build Information
       #     Collects environment, Git info, and publishes the aggregated build record.
