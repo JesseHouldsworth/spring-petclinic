@@ -110,7 +110,7 @@ jobs:
       - name: Publish Build Info
         run: |
           jf rt build-collect-env "spring-petclinic" "${{ github.run_id }}"
-          jf rt build-add-dependencies . "spring-petclinic" "${{ github.run_id }}"
+          jf rt build-add-dependencies . --build-name="spring-petclinic" --build-number="${{ github.run_id }}"
           jf rt build-add-git "spring-petclinic" "${{ github.run_id }}"
           jf rt build-publish "spring-petclinic" "${{ github.run_id }}"
     
