@@ -79,19 +79,6 @@ jobs:
 
       # 11. Publish Build Information
       #     Collects environment, Git info, and publishes the aggregated build record.
-      - name: Publish Build Info
-        run: |
-          echo "Collecting environment variables..."
-          # Use standard shell syntax ($VAR or ${VAR}) to access env vars here
-          jf rt build-collect-env "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- CORRECTED syntax
-          echo "Collecting Git information..."
-          jf rt build-add-git "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- CORRECTED syntax
-          echo "Publishing build info..."
-          jf rt build-publish "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER" # <-- CORRECTED syntax
-
-      # 12. Scan Published Build with Xray
-      #     This command associates the scan results with the build in the Artifactory UI.
-      #     'continue-on-error' prevents CI failure if jf bs exits non-zero.
       - name: Set Build Info
         run: |
           echo "Setting Build Info..."
@@ -114,6 +101,7 @@ jobs:
       - name: Publish Build Info
         run: |
           jf rt build-publish "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER"
+          
       # 12. Scan Published Build with Xray
       #     This command associates the scan results with the build in the Artifactory UI.
       #     'continue-on-error' prevents CI failure if jf bs exits non-zero.
