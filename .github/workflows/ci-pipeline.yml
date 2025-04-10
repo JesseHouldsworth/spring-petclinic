@@ -97,15 +97,22 @@ jobs:
           echo "Setting Build Info..."
           echo "JFROG_CLI_BUILD_NAME=my-build-name" >> $GITHUB_ENV
           echo "JFROG_CLI_BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
-      
-      - name: Check Build Info Variables
+        
+      - name: Verify Build Info Variables
         run: |
           echo "Building Name: $JFROG_CLI_BUILD_NAME"
           echo "Building Number: $JFROG_CLI_BUILD_NUMBER"
 
-      - name: Publish Build Info
+      - name: Collect Build Info
+        run: |
+          jf rt build-collect-env "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER"
+        
+      - name: Add Git Information
         run: |
           jf rt build-add-git "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER"
+        
+      - name: Publish Build Info
+        run: |
           jf rt build-publish "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER"
       # 12. Scan Published Build with Xray
       #     This command associates the scan results with the build in the Artifactory UI.
