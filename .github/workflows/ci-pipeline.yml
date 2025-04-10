@@ -82,7 +82,7 @@ jobs:
       - name: Set Build Info
         run: |
           echo "Setting Build Info..."
-          echo "JFROG_CLI_BUILD_NAME=my-build-name" >> $GITHUB_ENV
+          echo "JFROG_CLI_BUILD_NAME=spring-petclinic" >> $GITHUB_ENV
           echo "JFROG_CLI_BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
         
       - name: Verify Build Info Variables
@@ -101,7 +101,7 @@ jobs:
       - name: Publish Build Info
         run: |
           jf rt build-publish "$JFROG_CLI_BUILD_NAME" "$JFROG_CLI_BUILD_NUMBER"
-          
+
       # 12. Scan Published Build with Xray
       #     This command associates the scan results with the build in the Artifactory UI.
       #     'continue-on-error' prevents CI failure if jf bs exits non-zero.
