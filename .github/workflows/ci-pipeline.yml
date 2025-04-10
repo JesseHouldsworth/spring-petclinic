@@ -112,5 +112,5 @@ jobs:
         continue-on-error: true
         run: |
           echo "Scanning build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER with Xray..."
-          jf bs ${{env.JFROG_CLI_BUILD_NAME}} ${{env.JFROG_CLI_BUILD_NUMBER}}
+          jf bs ${{env.JFROG_CLI_BUILD_NAME}} ${{env.JFROG_CLI_BUILD_NUMBER}} --fail=true
           echo "Xray scan initiated via jf bs. Check the build info's Xray Data tab in Artifactory UI for results."
