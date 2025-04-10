@@ -65,7 +65,9 @@ jobs:
       #    'jf mvn' automatically associates deployed artifacts with build info.
       - name: Maven Build & Deploy With JFrog CLI
         run: |
-          jf mvn clean deploy -DskipTests=true -Denforcer.skip=true
+          jf mvn clean deploy -DskipTests=true -Denforcer.skip=true \
+            --build-name="spring-petclinic" \
+            --build-number="${{ github.run_number }}"
 
       # 9. Build Docker Image
       - name: Build Docker Image
