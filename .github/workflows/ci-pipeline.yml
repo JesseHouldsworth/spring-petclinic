@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+  # NEW: Daily build trigger
+  schedule:
+    - cron: "0 6 * * *"
+
 jobs:
   build-and-scan:
     runs-on: ubuntu-latest
@@ -36,7 +40,6 @@ jobs:
           JF_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
           JF_PASSWORD: ${{ secrets.ARTIFACTORY_IDENTITY_TOKEN }}
 
-      # Configures Maven to resolve all dependencies from your Artifactory instance
       # Configures Maven to resolve all dependencies from your Artifactory instance
       - name: Configure Maven Repositories
         run: |
