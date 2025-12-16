@@ -40,21 +40,24 @@ jobs:
           JF_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
           JF_PASSWORD: ${{ secrets.ARTIFACTORY_IDENTITY_TOKEN }}
 
-      # Configures Maven to resolve all dependencies from your Artifactory instance
+      # UPDATED: Configures Maven to resolve AND deploy dependencies
+      # I have assumed your deployment repo is 'jesseh-maven-dev-local' based on your Docker config.
       - name: Configure Maven Repositories
         run: |
           jf mvnc \
             --repo-resolve-releases=jesseh-maven-dev-virtual \
-            --repo-resolve-snapshots=jesseh-maven-dev-virtual
+            --repo-resolve-snapshots=jesseh-maven-dev-virtual \
+            --repo-deploy-releases=jesseh-maven-dev-local \
+            --repo-deploy-snapshots=jesseh-maven-dev-local
 
       # Automatically fixes any code formatting issues to prevent build failures
       - name: Apply Java Formatting
         run: mvn spring-javaformat:apply
 
-      # Wraps the Maven command to resolve dependencies and collect build-info
+      # UPDATED: Changed 'install' to 'deploy' to actually upload the artifacts
       - name: Build Application with Maven
         run: |
-          jf mvn clean install -DskipTests=true -Dcheckstyle.skip=true
+          jf mvn clean deploy -DskipTests=true -Dcheckstyle.skip=true
 
       # "Shift-left" scan for fast feedback on source code and dependencies
       - name: Run JFrog SAST & SCA Audit
