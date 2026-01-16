@@ -54,7 +54,7 @@ jobs:
 
       # Automatically fixes any code formatting issues to prevent build failures
       - name: Apply Java Formatting
-        run: mvn spring-javaformat:apply
+        run: jf mvn spring-javaformat:apply
 
       # UPDATED: Changed 'install' to 'deploy' to actually upload the artifacts
       - name: Build Application with Maven
