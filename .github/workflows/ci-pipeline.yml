@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-and-scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     # Environment variables for consistent build naming across all steps
     env:
@@ -32,6 +32,8 @@ jobs:
       # Installs and configures the JFrog CLI with your Artifactory server details
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
+        with:
+          version: 2.56.1
         env:
           JF_URL: ${{ secrets.JF_RT_URL }}
           JFROG_CLI_RELEASES_REPO: https://soleng.jfrog.io/artifactory/jesseh-maven-dev-virtual/
