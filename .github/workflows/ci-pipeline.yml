@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-  # NEW: Daily build trigger
-  schedule:
-    - cron: "0 6 * * *"
-
 jobs:
   build-and-scan:
     runs-on: ubuntu-22.04
